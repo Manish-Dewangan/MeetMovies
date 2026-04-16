@@ -6,6 +6,7 @@ import { ArrowRightIcon, ClockIcon } from "lucide-react";
 import isoTimeFormat from "../lib/IsoTimeFormat";
 import BlurCircle from "../components/BlurCircle";
 import toast from "react-hot-toast";
+import { useAppContext } from "../context/AppContext";
 
 const SeatLayout = () => {
   const groupRows = [
@@ -19,16 +20,20 @@ const SeatLayout = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const [selectedTime, setSelectedTime] = useState(null);
   const [show, setShow] = useState(null);
+  const [occupiedSeats, setOccupiedSeats] = useState([]);
 
   const navigate = useNavigate();
 
+  const { axios, getToken, user } = useAppContext();
+
   const getShow = async () => {
-    const show = dummyShowsData.find((show) => show._id === id);
-    if (show) {
-      setShow({
-        movie: show,
-        dateTime: dummyDateTimeData,
-      });
+    try {
+      const { data } = await axios.get(`/api/show/${id}`);
+      if (data.success) {
+        setShow(data);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -36,9 +41,18 @@ const SeatLayout = () => {
     if (!selectedTime) {
       return toast("Please select a time first", { icon: "⚠️" });
     }
+
+    // Agar occupiedSeats undefined hai toh fallback to empty array
+    const currentOccupied = occupiedSeats || [];
+
+    if (currentOccupied.includes(seatId)) {
+      return toast.error("This Seat is Already Booked"); // ⚠️ Toast bhi aayega aur select bhi nahi hoga
+    }
+
     if (!selectedSeats.includes(seatId) && selectedSeats.length > 4) {
       return toast("You can select maximum 5 seats", { icon: "⚠️" });
     }
+
     setSelectedSeats((prev) =>
       prev.includes(seatId)
         ? prev.filter((seat) => seat !== seatId)
@@ -51,11 +65,21 @@ const SeatLayout = () => {
       <div className="flex flex-wrap items-center justify-center gap-2">
         {Array.from({ length: count }, (_, i) => {
           const seatId = `${row}${i + 1}`;
+          const isOccupied = occupiedSeats?.includes(seatId);
+          const isSelected = selectedSeats.includes(seatId);
+          if (isOccupied) console.log("Matching seat found:", seatId);
           return (
             <button
               key={seatId}
               onClick={() => handleSeatClick(seatId)}
-              className={`h-8 w-8 rounded border border-primary/60 cursor-pointer ${selectedSeats.includes(seatId) && "bg-primary text-white"}`}
+              className={`h-8 w-8 rounded border text-[10px] transition-all cursor-pointer
+              ${
+                isOccupied
+                  ? "opacity-50 bg-gray-600 border-gray-600 text-gray-400" // Already Booked Style
+                  : isSelected
+                    ? "bg-primary border-primary text-white" // Selected Style
+                    : "border-primary/60 hover:bg-primary/10 text-gray-300" // Available Style
+              }`}
             >
               {seatId}
             </button>
@@ -65,10 +89,67 @@ const SeatLayout = () => {
     </div>
   );
 
+  const getOccupiedSeats = async () => {
+    try {
+      if (!selectedTime?.showId) return;
+      const { data } = await axios.get(
+        `/api/booking/seats/${selectedTime.showId}`,
+      );
+
+      console.log("Backend Seats Data:", data);
+
+      if (data.success) {
+        // ⚠️ FIX: data.occupiedSeats ki jagah data.message use karo
+        setOccupiedSeats(data.message || []);
+      } else {
+        setOccupiedSeats([]);
+        toast.error(data.message);
+      }
+    } catch (error) {
+      console.log("Error fetching seats:", error);
+      setOccupiedSeats([]);
+    }
+  };
+
+  const bookTickets = async () => {
+    try {
+      if (!user) return toast.error("Please login to proceed");
+
+      if (!selectedTime || !selectedSeats.length)
+        return toast.error("Please select a time and seats");
+
+      const token = await getToken();
+
+      const { data } = await axios.post(
+        "/api/booking/create",
+        {
+          showId: selectedTime.showId,
+          selectedSeats,
+        },
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+
+      if (data.success) {
+        toast.success(data.message);
+        navigate("/my-bookings");
+      } else {
+        toast.error(data.message);
+      }
+    } catch (error) {
+      toast.error(error.message);
+    }
+  };
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     getShow();
   }, []);
+
+  useEffect(() => {
+    if (selectedTime) {
+      getOccupiedSeats();
+    }
+  }, [selectedTime]);
 
   return show ? (
     <div className="flex flex-col md:flex-row px-6 md:px-16 lg:px-40 py-30 md:pt-50">
@@ -77,10 +158,15 @@ const SeatLayout = () => {
         <p className="text-lg font-semibold px-6">Available Timings</p>
         <div className="mt-5 space-y-1">
           {show.dateTime[date].map((item) => (
+            // Timings map ke andar check karo:
             <div
               key={item.time}
-              onClick={() => setSelectedTime(item.time)}
-              className={`flex items-center gap-2 px-6 py-2 w-max rounded-r-md cursor-pointer transition ${selectedTime === item.time ? "bg-primary text-white" : "hover:bg-primary/20"}`}
+              onClick={() => setSelectedTime(item)}
+              className={`flex items-center gap-2 px-6 py-2 w-max rounded-r-md cursor-pointer transition ${
+                selectedTime?.time === item.time
+                  ? "bg-primary text-white"
+                  : "hover:bg-primary/20"
+              }`}
             >
               <ClockIcon className="w-4 h-4" />
               <p className="text-sm">{isoTimeFormat(item.time)}</p>
@@ -107,7 +193,7 @@ const SeatLayout = () => {
           </div>
         </div>
         <button
-          onClick={() => navigate("/my-bookings")}
+          onClick={bookTickets}
           className="flex items-center gap-1 mt-20 px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-full font-medium cursor-pointer active:scale-95"
         >
           Proceed to Checkout

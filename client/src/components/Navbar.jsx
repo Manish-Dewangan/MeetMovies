@@ -4,6 +4,7 @@ import { assets } from "../assets/assets";
 import { MenuIcon, SearchIcon, TicketPlus, XIcon } from "lucide-react";
 import { UserButton, useUser, useClerk } from "@clerk/react";
 import { useNavigate } from "react-router-dom";
+import { useAppContext } from "../context/AppContext";
 
 const Navbar = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -11,10 +12,12 @@ const Navbar = () => {
   const { openSignIn } = useClerk();
   const navigate = useNavigate();
 
+  const { favoriteMovies } = useAppContext();
+
   return (
     <div className="fixed top-0 left-0 z-50 w-full flex items-center justify-between px-6 md:px-16 lg:px-36 py-5">
       <Link to="/" className="max-md:flex-1">
-        <img src={assets.logo} alt="Logo" className="w-36 h-auto" />
+        <img src={assets.MeetMoviesLogo} alt="Logo" className="w-36 h-auto" />
       </Link>
 
       <div
@@ -61,15 +64,17 @@ const Navbar = () => {
         >
           Releases
         </Link>
-        <Link
-          onClick={() => {
-            scrollTo(0, 0);
-            setIsOpen(false);
-          }}
-          to="/favorites"
-        >
-          Favorites
-        </Link>
+        {favoriteMovies.length > 0 && (
+          <Link
+            onClick={() => {
+              scrollTo(0, 0);
+              setIsOpen(false);
+            }}
+            to="/favorites"
+          >
+            Favorites
+          </Link>
+        )}
       </div>
 
       <div className="flex items-center gap-8">

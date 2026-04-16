@@ -4,6 +4,11 @@ import googlePlay from './googlePlay.svg'
 import appStore from './appStore.svg'
 import screenImage from './screenImage.svg'
 import profile from './profile.png'
+import minecraftLogo from './minecraftLogo.svg'
+import MeetMovies from './MeetMovies.svg'
+import MeetMoviesLogo from './MeetMoviesLogo.svg'
+import DemonSlayerLogo from './DemonSlayerLogo.svg'
+
 
 export const assets = {
     logo,
@@ -11,26 +16,29 @@ export const assets = {
     googlePlay,
     appStore,
     screenImage,
-    profile
+    profile,
+    minecraftLogo,
+    MeetMovies,
+    MeetMoviesLogo,
+    DemonSlayerLogo
 }
 
 export const dummyTrailers = [
     {
-        image: "https://img.youtube.com/vi/WpW36ldAqnM/maxresdefault.jpg",
-        // videoUrl: 'https://www.youtube.com/watch?v=WpW36ldAqnM'
-        videoUrl: 'https://www.youtube.com/embed/WpW36ldAqnM'
+        image: "https://img.youtube.com/vi/E1kipafZW2I/maxresdefault.jpg",
+        videoUrl : 'https://youtu.be/E1kipafZW2I?si=U9pv_1w3CDtht62t'
     },
     {
-        image: "https://img.youtube.com/vi/-sAOWhvheK8/maxresdefault.jpg",
-        videoUrl: 'https://www.youtube.com/watch?v=-sAOWhvheK8'
+        image: "https://img.youtube.com/vi/73_1biulkYk/maxresdefault.jpg",
+        videoUrl: 'https://youtu.be/73_1biulkYk?si=8TwbrOmKee3Im7TL'
     },
     {
         image: "https://img.youtube.com/vi/1pHDWnXmK7Y/maxresdefault.jpg",
         videoUrl: 'https://www.youtube.com/watch?v=1pHDWnXmK7Y'
     },
     {
-        image: "https://img.youtube.com/vi/umiKiW4En9g/maxresdefault.jpg",
-        videoUrl: 'https://www.youtube.com/watch?v=umiKiW4En9g'
+        image: "https://img.youtube.com/vi/wJO_vIDZn-I/maxresdefault.jpg",
+        videoUrl: 'https://youtu.be/wJO_vIDZn-I?si=xtBPdufY01s0AZgI'
     },
 ]
 
