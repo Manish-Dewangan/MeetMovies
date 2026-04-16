@@ -50,9 +50,30 @@ const Dashboard = () => {
     },
   ];
 
+  // const fetchDashboardData = async () => {
+  //   try {
+  //     const { data } = await axios.get("/api/admin/dashboard", {
+  //       headers: {
+  //         Authorization: `Bearer ${await getToken()}`,
+  //       },
+  //     });
+
+  //     if (data.success) {
+  //       setDashboardData(data.dashboardData);
+  //       setLoading(false);
+  //     } else {
+  //       toast.error(data.message);
+  //     }
+  //   } catch (error) {
+  //     toast.error("Error fetching dashboard data:", error);
+  //   }
+  // };
+
   const fetchDashboardData = async () => {
     try {
-      const { data } = await axios.get("/api/admin/dashboard", {
+      const BASE_URL = import.meta.env.VITE_BASE_URL;
+
+      const { data } = await axios.get(`${BASE_URL}/api/admin/dashboard`, {
         headers: {
           Authorization: `Bearer ${await getToken()}`,
         },
@@ -65,7 +86,8 @@ const Dashboard = () => {
         toast.error(data.message);
       }
     } catch (error) {
-      toast.error("Error fetching dashboard data:", error);
+      console.log(error);
+      toast.error("Error fetching dashboard data");
     }
   };
 
