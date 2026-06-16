@@ -1,7 +1,19 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import BlurCircle from "../components/BlurCircle";
-import { PlayCircleIcon, StarIcon, Heart } from "lucide-react"; // Grouped imports
+import {
+  PlayCircleIcon,
+  StarIcon,
+  Heart,
+  Clock3,
+  CalendarDays,
+  Globe,
+  ArrowRight,
+  Sparkles,
+  Users,
+  Film,
+  ChevronRight,
+} from "lucide-react";
 import timeFormat from "../lib/timeFormat";
 import DateSelect from "../components/DateSelect";
 import MovieCard from "../components/MovieCard";
@@ -13,6 +25,7 @@ const MovieDetails = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const [show, setShow] = useState(null);
+  const [imgLoaded, setImgLoaded] = useState(false);
 
   const {
     shows,
@@ -56,111 +69,278 @@ const MovieDetails = () => {
 
   useEffect(() => {
     getShow();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Check if 'show' and 'show.movie' exist before rendering
-  if (!show || !show.movie) {
-    return <Loading />;
-  }
+  const isFavorite = favoriteMovies?.some(
+    (movie) => String(movie._id) === String(id),
+  );
+
+  if (!show || !show.movie) return <Loading />;
+
+  const movie = show.movie;
+  const rating = (movie.vote_average || 0).toFixed(1);
+  const releaseYear = movie.release_date?.split("-")[0];
+  const duration = timeFormat(movie.runtime);
+  const genres = movie.genres?.map((g) => g.name) || [];
 
   return (
-    <div className="px-6 md:px-16 lg:px-40 pt-30 md:pt-50">
-      <div className="flex flex-col md:flex-row gap-8 max-x-6xl mx-auto">
+    <div className="relative min-h-screen overflow-hidden pb-24">
+      {/* ── Hero Banner Background ── */}
+      <div className="absolute inset-x-0 top-0 h-[70vh] overflow-hidden -z-10">
         <img
-          src={image_base_url + show.movie.poster_path}
-          alt={show.movie.title}
-          className="max-md:mx-auto rounded-xl h-104 max-w-70 object-cover"
+          src={image_base_url + movie.backdrop_path}
+          alt=""
+          className="h-full w-full object-cover object-top opacity-30 blur-sm scale-105"
         />
-        <div className="relative flex flex-col gap-3">
-          <BlurCircle top="-100px" left="-100px" />
-          <p className="text-primary">ENGLISH</p>
-          <h1 className="text-4xl font-semibold max-w-96 text-balance">
-            {show.movie.title}
-          </h1>
-          <div className="flex items-center gap-2 text-gray-300">
-            <StarIcon className="w-5 h-5 text-primary fill-primary" />
-            {(show.movie.vote_average || 0).toFixed(1)} User Rating
-          </div>
-          <p className="text-gray-400 mt-2 text-sm leading-tight max-w-xl">
-            {show.movie.overview}
-          </p>
-          <p>
-            {timeFormat(show.movie.runtime)} •{" "}
-            {/* {show.movie.genres?.map((genre) => genre.name).join(", ")} •{" "} */}
-            {show.movie.release_date?.split("-")[0]}
-          </p>
-          <div className="flex items-center flex-wrap gap-4 mt-4">
-            <button className="flex items-center flex-wrap gap-2 px-7 py-3 text-sm bg-gray-800 hover:bg-gray-900 transition rounded-md font-medium cursor-pointer active:scale-95">
-              <PlayCircleIcon className="w-5 h-5" />
-              Watch Trailer
-            </button>
-            <a
-              href="#dateSelect"
-              className="px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-md font-medium cursor-pointer active:scale-95"
-            >
-              Buy Tickets
-            </a>
-            <button
-              onClick={handleFavorite}
-              className="bg-gray-700 p-2.5 rounded-full transition cursor-pointer active:scale-95"
-            >
-              {/* <Heart
-                className={`w-5 h-5 ${
-                  favoriteMovies.find((movie) => movie._id === id)
-                    ? "fill-primary text-primary"
-                    : ""
-                }`}
-              /> */}
-              <Heart
-                className={`w-5 h-5 ${
-                  favoriteMovies?.some(
-                    (movie) => String(movie._id) === String(id),
-                  )
-                    ? "fill-primary text-primary"
-                    : ""
-                }`}
-              />
-            </button>
-          </div>
-        </div>
+        <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/80 to-[#0a0a0a]" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/70 to-transparent" />
       </div>
 
-      <p className="text-lg font-medium mt-20">Your Favorite Cast</p>
-      <div className="overflow-x-auto no-scrollbar mt-8 pb-4">
-        <div className="flex items-center gap-4 w-max px-4">
-          {show.movie.casts?.slice(0, 12).map((cast, index) => (
-            <div key={index} className="flex flex-col items-center text-center">
+      {/* ── Main Content ── */}
+      <div className="relative px-6 md:px-16 lg:px-24 xl:px-36 pt-28 md:pt-40">
+        <div className="flex flex-col lg:flex-row gap-10 max-w-7xl mx-auto">
+          {/* ── Poster ── */}
+          <div className="relative flex-shrink-0 mx-auto lg:mx-0">
+            {/* Poster glow */}
+            <div className="absolute -inset-3 rounded-3xl bg-red-600/10 blur-2xl opacity-50" />
+
+            <div className="relative overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/50">
+              {!imgLoaded && (
+                <div className="absolute inset-0 bg-zinc-800 animate-pulse rounded-2xl" />
+              )}
               <img
-                src={image_base_url + cast.profile_path}
-                alt={cast.name}
-                className="rounded-full h-20 md:h-20 aspect-square object-cover"
+                src={image_base_url + movie.poster_path}
+                alt={movie.title}
+                onLoad={() => setImgLoaded(true)}
+                className={`h-[420px] md:h-[480px] w-[280px] md:w-[320px] object-cover transition-opacity duration-500 ${
+                  imgLoaded ? "opacity-100" : "opacity-0"
+                }`}
               />
-              <p className="text-xs mt-3 font-medium">{cast.name}</p>
+
+              {/* Rating overlay on poster */}
+              <div className="absolute top-3 left-3 flex items-center gap-1.5 px-3 py-1 rounded-full bg-black/70 backdrop-blur-md border border-yellow-400/20">
+                <StarIcon className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                <span className="text-yellow-400 text-xs font-bold">
+                  {rating}
+                </span>
+              </div>
             </div>
-          ))}
+          </div>
+
+          {/* ── Details ── */}
+          <div className="relative flex flex-col gap-4 flex-1 max-w-2xl">
+            <BlurCircle top="-100px" left="-100px" />
+
+            {/* Language badge */}
+            <div className="inline-flex self-start items-center gap-1.5 px-3 py-1 rounded-full border border-red-500/20 bg-red-500/10 text-red-400 text-xs font-semibold uppercase tracking-wider">
+              <Globe className="w-3 h-3" />
+              English
+            </div>
+
+            {/* Title */}
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black text-white leading-tight tracking-tight">
+              {movie.title}
+            </h1>
+
+            {/* Meta pills */}
+            <div className="flex flex-wrap items-center gap-2.5 mt-1">
+              {/* Rating */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-yellow-400/20 bg-yellow-400/10">
+                <StarIcon className="w-3.5 h-3.5 fill-yellow-400 text-yellow-400" />
+                <span className="text-yellow-400 text-sm font-semibold">
+                  {rating}
+                </span>
+                <span className="text-gray-400 text-xs">Rating</span>
+              </div>
+
+              {/* Duration */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5">
+                <Clock3 className="w-3.5 h-3.5 text-red-400" />
+                <span className="text-gray-300 text-sm">{duration}</span>
+              </div>
+
+              {/* Year */}
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border border-white/10 bg-white/5">
+                <CalendarDays className="w-3.5 h-3.5 text-red-400" />
+                <span className="text-gray-300 text-sm">{releaseYear}</span>
+              </div>
+            </div>
+
+            {/* Genres */}
+            {genres.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-1">
+                {genres.map((genre) => (
+                  <span
+                    key={genre}
+                    className="px-3 py-1 text-xs font-medium text-gray-300 bg-white/5 border border-white/10 rounded-full"
+                  >
+                    {genre}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            {/* Overview */}
+            <div className="mt-3">
+              <h3 className="text-sm font-semibold text-gray-200 mb-2">
+                Storyline
+              </h3>
+              <p className="text-gray-400 text-sm md:text-base leading-relaxed">
+                {movie.overview}
+              </p>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3 mt-6">
+              <button className="group flex items-center gap-2 px-6 py-3 rounded-full bg-white/10 border border-white/10 hover:bg-white/15 text-white text-sm font-semibold transition-all duration-300 hover:scale-105 backdrop-blur-md">
+                <PlayCircleIcon className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                Watch Trailer
+              </button>
+
+              <a
+                href="#dateSelect"
+                className="group flex items-center gap-2 px-7 py-3 rounded-full bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-lg shadow-red-600/25 transition-all duration-300 hover:scale-105"
+              >
+                Buy Tickets
+                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </a>
+
+              <button
+                onClick={handleFavorite}
+                className={`flex items-center justify-center h-12 w-12 rounded-full border transition-all duration-300 hover:scale-110 cursor-pointer ${
+                  isFavorite
+                    ? "bg-red-500/20 border-red-500/40 shadow-lg shadow-red-600/20"
+                    : "bg-white/5 border-white/15 hover:bg-white/10"
+                }`}
+                title={
+                  isFavorite ? "Remove from favorites" : "Add to favorites"
+                }
+              >
+                <Heart
+                  className={`w-5 h-5 transition-colors duration-300 ${
+                    isFavorite
+                      ? "fill-red-500 text-red-500"
+                      : "text-gray-300 hover:text-red-400"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
         </div>
-      </div>
 
-      <DateSelect dateTime={show.dateTime} id={id} />
+        {/* ── Cast Section ── */}
+        {movie.casts && movie.casts.length > 0 && (
+          <div className="max-w-7xl mx-auto mt-20">
+            <div className="flex items-center justify-between mb-8">
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-500/20 bg-red-500/10 text-red-400 text-sm font-medium mb-3">
+                  <Users className="w-4 h-4" />
+                  Top Cast
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white">
+                  Your Favorite Cast
+                </h2>
+              </div>
+            </div>
 
-      <p className="text-lg font-medium mt-20 mb-8">You May Also Like</p>
-      <div className="flex flex-wrap max-sm:justify-center gap-8">
-        {shows.slice(0, 4).map((movie, index) => (
-          <MovieCard key={index} movie={movie} />
-        ))}
-      </div>
+            <div className="overflow-x-auto no-scrollbar pb-4">
+              <div className="flex items-start gap-5 w-max">
+                {movie.casts.slice(0, 12).map((cast, index) => (
+                  <div
+                    key={index}
+                    className="group flex flex-col items-center text-center w-24"
+                  >
+                    {/* Cast Image */}
+                    <div className="relative overflow-hidden rounded-full border-2 border-white/10 group-hover:border-red-500/30 transition-all duration-300 group-hover:shadow-lg group-hover:shadow-red-600/10">
+                      {cast.profile_path ? (
+                        <img
+                          src={image_base_url + cast.profile_path}
+                          alt={cast.name}
+                          className="h-20 w-20 object-cover transition-transform duration-500 group-hover:scale-110"
+                        />
+                      ) : (
+                        <div className="h-20 w-20 flex items-center justify-center bg-zinc-800 text-gray-500">
+                          <Users className="w-6 h-6" />
+                        </div>
+                      )}
+                    </div>
 
-      <div className="flex justify-center mt-10">
-        <button
-          onClick={() => {
-            navigate("/movies");
-            window.scrollTo(0, 0);
-          }}
-          className="px-10 py-3 text-sm bg-primary hover:bg-primary-dull transition rounded-md font-medium cursor-pointer"
-        >
-          Show More
-        </button>
+                    {/* Cast Name */}
+                    <p className="text-xs font-medium text-white mt-3 leading-tight line-clamp-2">
+                      {cast.name}
+                    </p>
+
+                    {/* Character name */}
+                    {cast.character && (
+                      <p className="text-[10px] text-gray-500 mt-0.5 line-clamp-1">
+                        {cast.character}
+                      </p>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Date Selection ── */}
+        <div className="max-w-7xl mx-auto mt-16" id="dateSelect">
+          <DateSelect dateTime={show.dateTime} id={id} />
+        </div>
+
+        {/* ── Similar Movies ── */}
+        {shows.length > 0 && (
+          <div className="max-w-7xl mx-auto mt-20">
+            <div className="flex items-end justify-between mb-10">
+              <div>
+                <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-red-500/20 bg-red-500/10 text-red-400 text-sm font-medium mb-3">
+                  <Sparkles className="w-4 h-4" />
+                  Recommended
+                </div>
+                <h2 className="text-2xl md:text-3xl font-bold text-white">
+                  You May Also Like
+                </h2>
+              </div>
+
+              <button
+                onClick={() => {
+                  navigate("/movies");
+                  scrollTo(0, 0);
+                }}
+                className="group hidden md:flex items-center gap-2 text-sm text-gray-300 hover:text-white transition-colors"
+              >
+                View All
+                <ChevronRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+              {shows.slice(0, 4).map((movie, index) => (
+                <div key={index} className="relative group">
+                  <div className="absolute -inset-1 rounded-3xl bg-gradient-to-b from-red-500/10 to-transparent opacity-0 group-hover:opacity-100 blur-xl transition-all duration-500" />
+                  <div className="relative rounded-3xl border border-white/8 bg-white/[0.03] p-2 backdrop-blur-sm transition-all duration-300 group-hover:-translate-y-2 group-hover:border-red-500/20">
+                    <MovieCard movie={movie} />
+                  </div>
+                </div>
+              ))}
+            </div>
+
+            {/* Bottom CTA */}
+            <div className="flex justify-center mt-14">
+              <button
+                onClick={() => {
+                  navigate("/movies");
+                  scrollTo(0, 0);
+                }}
+                className="group inline-flex items-center gap-2 px-8 py-3.5 rounded-full bg-red-600 hover:bg-red-700 text-white text-sm font-semibold shadow-lg shadow-red-600/20 transition-all duration-300 hover:scale-105"
+              >
+                <Film className="w-4 h-4" />
+                Explore More Movies
+                <ArrowRight className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" />
+              </button>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

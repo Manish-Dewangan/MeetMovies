@@ -4,6 +4,7 @@ import {
   LayoutDashboardIcon,
   ListCollapseIcon,
   ListIcon,
+  LogOutIcon,
   PlusSquareIcon,
 } from "lucide-react";
 import { NavLink } from "react-router-dom";
@@ -16,48 +17,90 @@ const AdminSidebar = () => {
   };
 
   const adminNavlinks = [
-    { name: "Dashboard", path: "/admin", icon: LayoutDashboardIcon },
-    { name: "Add Shows", path: "/admin/add-shows", icon: PlusSquareIcon },
-    { name: "List Shows", path: "/admin/list-shows", icon: ListIcon },
     {
-      name: "List Bookings",
+      name: "Dashboard",
+      path: "/admin",
+      icon: LayoutDashboardIcon,
+    },
+    {
+      name: "Add Shows",
+      path: "/admin/add-shows",
+      icon: PlusSquareIcon,
+    },
+    {
+      name: "List Shows",
+      path: "/admin/list-shows",
+      icon: ListIcon,
+    },
+    {
+      name: "Bookings",
       path: "/admin/list-bookings",
       icon: ListCollapseIcon,
     },
   ];
+
   return (
-    <div className="h-[calc(100vh-64px)] md:flex flex-col items-center pt-8 max-w-13 md:max-w-60 w-full border-r border-gray-300/20 text-sm">
-      <img
-        className="h-9 md:h-14 w-9 md:w-14 rounded-full mx-auto"
-        src={user.imageUrl}
-        alt="sidebar"
-      />
-      <p className="mt-2 text-base max-md:hidden">
-        {user.firstName} {user.lastName}
-      </p>
-      <div className="w-full">
-        {adminNavlinks.map((link, index) => (
+    <aside className="h-[calc(100vh-64px)] bg-[#0f172a]/70 backdrop-blur-xl border-r border-white/10 flex flex-col w-[80px] md:w-[260px] transition-all duration-300">
+      {/* Profile */}
+      <div className="flex flex-col items-center px-4 py-8 border-b border-white/10">
+        <img
+          src={user.imageUrl}
+          alt="Admin"
+          className="w-12 h-12 md:w-16 md:h-16 rounded-full object-cover ring-2 ring-primary/40"
+        />
+
+        <h3 className="hidden md:block mt-3 text-white font-semibold">
+          {user.firstName} {user.lastName}
+        </h3>
+
+        <span className="hidden md:block mt-1 px-3 py-1 text-xs rounded-full bg-primary/20 text-primary">
+          Administrator
+        </span>
+      </div>
+
+      {/* Navigation */}
+      <nav className="flex-1 py-4">
+        {adminNavlinks.map((link) => (
           <NavLink
-            key={index}
+            key={link.path}
             to={link.path}
             end
             className={({ isActive }) =>
-              `relative flex items-center max-md:justify-center gap-2 w-full py-2.5 min-md:pl-10 first:mt-6 text-gray-400 &{isActive && 'bg-primary/15 text-primary group'}`
+              `group relative flex items-center gap-3 mx-2 px-4 py-3 rounded-xl transition-all duration-200
+              ${
+                isActive
+                  ? "bg-primary/15 text-primary"
+                  : "text-gray-400 hover:bg-white/5 hover:text-white"
+              }`
             }
           >
             {({ isActive }) => (
               <>
-                <link.icon className="w-5 h-5" />
-                <p className="max-md:hidden">{link.name}</p>
-                <span
-                  className={`w-1.5 h-10 rounded-l right-0 absolute ${isActive && "bg-primary"}`}
-                ></span>
+                <link.icon
+                  className={`w-5 h-5 shrink-0 ${
+                    isActive ? "text-primary" : ""
+                  }`}
+                />
+
+                <span className="hidden md:block font-medium">{link.name}</span>
+
+                {isActive && (
+                  <span className="absolute left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-primary rounded-r-full" />
+                )}
               </>
             )}
           </NavLink>
         ))}
+      </nav>
+
+      {/* Footer */}
+      <div className="p-3 border-t border-white/10">
+        <button className="flex items-center justify-center md:justify-start gap-3 w-full px-4 py-3 rounded-xl text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition">
+          <LogOutIcon className="w-5 h-5" />
+          <span className="hidden md:block">Logout</span>
+        </button>
       </div>
-    </div>
+    </aside>
   );
 };
 
