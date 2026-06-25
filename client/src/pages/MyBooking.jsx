@@ -151,7 +151,7 @@ const MyBooking = () => {
                     <div className="flex flex-col gap-3 flex-1">
                       {/* Title */}
                       <h2
-                        onClick={() => navigate(`/movies/${item?.show?._id}`)}
+                        onClick={() => navigate(`/movies/${movie?._id}`)}
                         className="text-xl font-bold text-white cursor-pointer hover:text-red-400 transition-colors leading-tight"
                       >
                         {movie?.title}

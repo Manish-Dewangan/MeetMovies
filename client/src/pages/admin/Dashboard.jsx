@@ -127,8 +127,7 @@ const Dashboard = () => {
       try {
         if (isRefresh) setRefreshing(true);
 
-        const BASE_URL = import.meta.env.VITE_BASE_URL;
-        const { data } = await axios.get(`${BASE_URL}/api/admin/dashboard`, {
+        const { data } = await axios.get("/api/admin/dashboard", {
           headers: { Authorization: `Bearer ${await getToken()}` },
         });
 

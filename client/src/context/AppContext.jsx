@@ -39,20 +39,29 @@ export const AppProvider = ({ children }) => {
   const fetchIsAdmin = async () => {
     try {
       const token = await getToken();
-      if (!token) return; // Agar token nahi hai toh request mat bhejo
+      if (!token) {
+        setIsAdmin(false);
+        return;
+      }
 
       const { data } = await axios.get("/api/admin/is-admin", {
-        headers: { Authorization: `Bearer ${token}` }, // Pehle token variable mein lo
+        headers: { Authorization: `Bearer ${token}` },
       });
 
-      setIsAdmin(data.isAdmin);
+      const admin = Boolean(data.success && data.isAdmin);
+      setIsAdmin(admin);
 
-      if (!data.isAdmin && location.pathname.startsWith("/admin")) {
+      if (!admin && location.pathname.startsWith("/admin")) {
         navigate("/");
         toast.error("You are not authorized to access admin dashboard");
       }
     } catch (error) {
       console.error("Admin Check Error:", error);
+      setIsAdmin(false);
+      if (location.pathname.startsWith("/admin")) {
+        navigate("/");
+        toast.error("Unable to verify admin access");
+      }
     }
   };
 

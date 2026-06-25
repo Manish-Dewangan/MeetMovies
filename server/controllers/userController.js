@@ -6,16 +6,20 @@ import Movie from "../models/Movie.js";
 // API Controller Fuction to Get User Bookings
 export const getUserBookings = async (req,res) =>{
   try {
-    const user = req.auth().userId;
+    const { userId } = req.auth();
 
-    const bookings = await Booking.find({user}).populate({
+    if (!userId) {
+      return res.status(401).json({ success: false, message: "Unauthorized" });
+    }
+
+    const bookings = await Booking.find({ user: userId }).populate({
       path : "show",
       populate: {path: "movie"}
     }).sort({createdAt: -1})
     res.json({success:true, bookings})
   } catch (error) {
     console.error(error.message);
-    console.error({success:false,message:error.message});
+    res.status(500).json({ success: false, message: error.message });
   }
 }
 
